@@ -21,9 +21,10 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 
 
 Route::apiResource('roles', RolController::class);
+Route::put('rol/{id}',[RolController::class,'update'] );
+
 Route::apiResource('usuarios', UsuarioController::class);
 Route::get('usuarios/ruc/{ruc}', [UsuarioController::class, 'byRuc']);
-Route::apiResource('roles', RolController::class);
 
 Route::post('/registrar', [AuthController::class, 'register']);
 

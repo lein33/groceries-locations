@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 use App\Models\Rol;
 use Illuminate\Http\Request;
 use App\Http\Responses\AppResponse;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\QueryException;
+use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class RolController extends Controller
 {
@@ -26,11 +30,29 @@ class RolController extends Controller
         return AppResponse::success("rol existe",201,$rol);    
     }
 
-    public function update(Request $request, Rol $rol)
+    public function update(Request $request, $id)
     {
-        $request->validate(['nombre' => 'sometimes|string|max:255']);
-        $rol->update($request->all());
-        return AppResponse::success("rol actualizado",201,$rol);    
+
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:255|unique:rols,nombre,' . $id,
+            
+        ]);
+        if ($validator->fails()) {
+            return AppResponse::error('error, ya existen estos datos',422,$validator->errors());
+
+        }
+         $validated = $validator->validated();
+        $rol = Rol::findOrFail($id);
+        
+        if (!$rol) {
+            return AppResponse::error('rol no encontrado',404,[]);
+        }
+        //if (isset($validated['nombre'])) $rol->nombre = $validated['nombre'];
+        $rol->nombre = $validated['nombre'];
+
+       $rol->save();
+       return AppResponse::success("rol editado",201,$rol);    
+
 
     }
 
